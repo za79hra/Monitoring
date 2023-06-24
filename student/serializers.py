@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from django.db import transaction
 from django.contrib.auth.models import User
 
-from .models import Student, Report, Payment
+from .models import Student, Report, Payment, Answer
 
 from ceo.models import Course
 from Monitoring.utils import *
@@ -173,3 +173,17 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = '__all__'
+
+
+
+
+# answer of exercise
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = '__all__'
+
+        read_only_fields = ['created_at', 'modified_at', 'is_deleted', 'mentor', 'student','course', 'exercise']
+        extra_kwargs = {
+            'exercise_text': {'required': True},
+        }

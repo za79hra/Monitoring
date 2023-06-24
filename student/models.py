@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin
 
 
-from mentor.models import Mentor
+from mentor.models import Mentor, Exercise
 from ceo.models import Course
 
 
@@ -127,3 +127,26 @@ class AdminPayment(models.Model):
 
         # Return the new AdminPayment object
         return admin_payment
+    
+
+
+# exercise
+
+class Answer(models.Model):
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE, related_name='exercise')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='student_exercise')
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='mentor_exercise_model_student')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_exercise')
+    exercise_text = models.TextField(blank=False, null=False)
+    exercise_file = models.FileField(max_length=200, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    is_done_exercise = models.BooleanField(default=False)
+    is_seen_by_mentor = models.BooleanField(default=False)
+   
+
+    
+
+    def __str__(self):
+        return self.exercise_text

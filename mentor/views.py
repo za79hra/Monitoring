@@ -20,7 +20,6 @@ from .models import(
 )
 
 from .serializers import (
-    # AnswerSerializer, 
     ExerciseSerializer,
     # ExamSerializer,
     # ExamStatusHomeSerializer,
@@ -28,8 +27,9 @@ from .serializers import (
     # AnswerExamSerializer
    
 )
+from student.serializers import AnswerSerializer
 from ceo.models import Course
-from student.models import Student
+from student.models import Student, Answer
 from mentor.models import Mentor
 from rest_framework.exceptions import ValidationError
 
@@ -89,9 +89,6 @@ class MentorSendExercise(APIView):
         serializer = ExerciseSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         mentor = Mentor.objects.get(user=request.user)
-        # courses = mentor.mentor_of_course.all()
-        # print(courses)
-        # courses = Course.objects.filter()
         student_names = serializer.validated_data.pop('student_name', [])
         send_to_all = serializer.validated_data.pop('send_to_all', False)
 
@@ -141,3 +138,34 @@ class GetOnePostedExerciseOfMentor(APIView):
         exercises = Exercise.objects.filter(mentor=mentor, student_name=student, id=id)
         serializer = ExerciseSerializer(instance=exercises, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#get answer-exercise of student
+class MentorStudentExerciseList(APIView):
+ #   authentication_classes = [JWTAuthentication]
+    def get(self, request,  student_id):
+
+        mentor = Mentor.objects.get(user=request.user)
+        student = Student.objects.get(id=student_id)
+        exercises = Answer.objects.filter(mentor=mentor, student=student, is_done_exercise=True)
+        for exercise in exercises:
+            exercise.is_seen_by_mentor = True
+            exercise.save()
+        serializer = AnswerSerializer(exercises, many=True)
+        return Response(serializer.data)
+
+
+class GetMentorExerciseStatus(APIView):
+ #   authentication_classes = [JWTAuthentication]
+
+    def get(self, request, student_id):
+        mentor = Mentor.objects.get(user=request.user)
+        
+        student = Student.objects.get(id=student_id)
+
+        exercises_viewed = Answer.objects.filter(mentor=mentor,  student=student, is_seen_by_mentor=True)
+        exercises_not_viewed = Answer.objects.filter(mentor=mentor,  student=student, is_seen_by_mentor=False)
+        num_exercises_viewed = exercises_viewed.count()
+        num_exercises_not_viewed = exercises_not_viewed.count()
+        return Response({'num_exercises_viewed': num_exercises_viewed, 'num_exercises_not_viewed': num_exercises_not_viewed})
+    
