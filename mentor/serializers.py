@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from Monitoring.utils import *
 
-from .models import Mentor, Exercise
+from .models import Mentor, Exercise, Exam, Grade
 
 
 class MentorSerializer(serializers.ModelSerializer):
@@ -153,3 +153,31 @@ class ExerciseSerializer(serializers.ModelSerializer):
         data['mentor'] = mentor
         return data
 
+#exam
+class ExamSerializer(serializers.ModelSerializer):
+ 
+    class Meta:
+        model = Exam
+        fields = '__all__'
+        # fields = ['mentor', 'exam_name', 'exam_date', 'description', 'created_at', 'modified_at', 'is_deleted']
+        read_only_fields = ['created_at', 'modified_at', 'is_deleted', 'course_name']
+
+
+
+class GradeSerializer(serializers.ModelSerializer):
+    student_first_name = serializers.CharField(source='student_name.first_name', read_only=True)
+    student_last_name = serializers.CharField(source='student_name.last_name', read_only=True)
+    exam_name = serializers.CharField(source='exam.exam_name', read_only=True)
+    mentor_name = serializers.CharField(source='mentor.name', read_only=True)
+    class Meta:
+        model = Grade
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at', 'is_deleted', 'exam', 'mentor', 'student_name']
+
+
+class ExamStatusHomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exam
+        fields = '__all__'
+        # fields = ['exam_name', 'exam_date', 'status', 'score', 'exam_number']
+        read_only_fields = ['created_at', 'modified_at', 'is_deleted']

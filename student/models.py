@@ -150,3 +150,19 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.exercise_text
+    
+
+
+# AnswerExam
+class AnswerExam(models.Model):
+    exam = models.ForeignKey("mentor.Exam", on_delete=models.CASCADE, related_name='exam_aswer')
+    exam_file = models.FileField(max_length=200, blank=True, null=True)
+    caption = models.TextField()
+    student = models.ManyToManyField(Student, related_name='student_exam')
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='mentor_answer_exam')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='course_exam')
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+   

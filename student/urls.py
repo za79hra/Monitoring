@@ -18,9 +18,9 @@ GetStudentExerciseStatus,
 # GradeListView,
 # GetAllExam,
 # GetOnePostedExerciseOfMentor,
-# StudentGetExam,
+StudentGetExam,
 # ExamStatusList,
-# GradeView
+GradeView
 )
 
 
@@ -41,4 +41,8 @@ urlpatterns = [
     path('get-answer-student/<int:id>/', GetPostedExerciseOfStudent.as_view(), name='exercises_list_student'),
     path('student-status/', GetStudentExerciseStatus.as_view(), name='student_status'),
    
+#   student
+    path('send-answer-exam/<int:id>/', StudentGetExam.as_view()),
+    path('grade-exam/<int:exam_id>/', GradeView.as_view()),
+
 ]

@@ -24,57 +24,19 @@ from rest_framework.authtoken.models import Token
 
 from .models import(
      Answer,
-    #  Exam,
-    #  Grade,
-    #  AnswerExam
+     AnswerExam
 )
 
 from .serializers import (
     AnswerSerializer, 
-    # ExerciseSerializer,
-    # ExamSerializer,
-    # ExamStatusHomeSerializer,
-    # GradeSerializer,
-    # AnswerExamSerializer
+    AnswerExamSerializer
    
 )
-from mentor.serializers import ExerciseSerializer, Exercise
+from mentor.serializers import ExerciseSerializer, ExamSerializer, ExamStatusHomeSerializer, GradeSerializer
 from ceo.models import Course
 from student.models import Student
-from mentor.models import Mentor
+from mentor.models import Mentor, Exam, Exercise, Grade
 
-
-
-
-
-
-# class CreateStudentView(APIView):
-#     @method_decorator(login_required)
-#     def post(self, request):
-#         # Check if the user is an admin
-#         if not request.user.is_staff:
-#             return Response({'error': 'You do not have permission to create a student account.'},
-#                             status=status.HTTP_403_FORBIDDEN)
-#
-#         # Get the request data and create the new student account
-#         try:
-#             admin = Admin.objects.get(user=request.user)
-#             student_firstname = request.data['first_name']
-#             student_lastname = request.data['last_name']
-#             student_phone_number = request.data['phone_number']
-#             student_birthday = request.data['date_of_birth']
-#             student_identity_code = request.data['identity_code']
-#             student_personality = request.data['personality']
-#             student_avatar = request.data['avatar']
-#             student = admin.create_student_account(student_firstname, student_lastname, student_phone_number,
-#                                                    student_birthday, student_identity_code, student_personality,
-#                                                    student_avatar)
-#         except Exception as e:
-#             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         # Return the new student object
-#         serializer = StudentSerializer(student)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class StudentLoginView(TokenObtainPairView):
@@ -225,4 +187,58 @@ class GetStudentExerciseStatus(APIView):
         num_exercises_done = exercises_done.count()
         num_exercises_not_done = exercises_not_done.count()
         return Response({'num_exercises_done': num_exercises_done, 'num_exercises_not_done': num_exercises_not_done})
+
+
+
+
+#student-exam
+
+class StudentGetExam(APIView):
+#   authentication_classes = [JWTAuthentication]
+
+    def get_object(self, id):
+        student = Student.objects.get(user=self.request.user)
+        return Exam.objects.filter(id=id, student_name=student)
+
+    def get(self, request, id, format=None):
+        exams = self.get_object(id)
+        serializer = ExamSerializer(exams, many=True)
+        return Response(serializer.data)
+
+    def post(self,request, id):
+        student = Student.objects.get(user=request.user)
+
+        exam =Exam.objects.get(id=id, student_name=student)
+        course = student.course
+        mentor = course.mentor
+
+        # Check if the student has already answered the exercise
+        if AnswerExam.objects.filter(student=student, exam=exam).exists():
+            return Response({'detail': 'You have already answered this exercise.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if the course object has the id attribute
+        if not hasattr(course, 'id'):
+            course = Course.objects.get(pk=course.pk)
+
+        serializer = AnswerExamSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(student=[student], mentor=mentor,course=course, exam=exam)   
+    
+    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+
+class GradeView(APIView):
+   
+    def get(self, request, exam_id):
+        student = Student.objects.get(user=request.user)
+        try:
+            grade = Grade.objects.get(exam_id=exam_id, student_name=student)
+            serializer = GradeSerializer(grade)
+            return Response(serializer.data)
+        except Grade.DoesNotExist:
+            return Response({'detail': 'Grade not found.'}, status=status.HTTP_404_NOT_FOUND)
+      
+
 
