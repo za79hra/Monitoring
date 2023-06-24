@@ -32,3 +32,22 @@ class Mentor(models.Model):
     def __str__(self):
         # return f"{self.id} - {self.first_name} {self.last_name}"
         return f"{self.first_name} - {self.phone_number} - {self.date_of_birth}"
+    
+
+
+
+
+class Exercise(models.Model):
+
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='mentor_exercise_model')
+    course_name = models.ForeignKey("ceo.Course", on_delete=models.CASCADE, related_name='course_name')
+    student_name = models.ManyToManyField("student.Student", related_name='assigned_exercises')
+    send_to_all = models.BooleanField(default=False)
+    exercise_name = models.CharField(max_length=200)
+    caption = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.exercise_name

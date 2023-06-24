@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from Monitoring.utils import *
 
-from .models import Mentor
+from .models import Mentor, Exercise
 
 
 class MentorSerializer(serializers.ModelSerializer):
@@ -135,3 +135,21 @@ class LoginViewAsMentorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mentor
         fields = ('username', 'password')
+
+
+
+# exercise
+class ExerciseSerializer(serializers.ModelSerializer):
+    # url = serializers.HyperlinkedIdentityField(view_name='MentorStudentExerciseList')
+    class Meta:
+        model = Exercise
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at', 'is_deleted']
+     
+
+    def validate(self, data):
+    
+        mentor = self.context['request'].user
+        data['mentor'] = mentor
+        return data
+
