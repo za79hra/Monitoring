@@ -22,6 +22,31 @@ from .serializers import StudentSerializer, StudentTokenObtainPairSerializer,\
 from django.shortcuts import redirect
 from rest_framework.authtoken.models import Token
 
+from .models import(
+     Answer,
+    #  Exam,
+    #  Grade,
+    #  AnswerExam
+)
+
+from .serializers import (
+    AnswerSerializer, 
+    # ExerciseSerializer,
+    # ExamSerializer,
+    # ExamStatusHomeSerializer,
+    # GradeSerializer,
+    # AnswerExamSerializer
+   
+)
+from mentor.serializers import ExerciseSerializer, Exercise
+from ceo.models import Course
+from student.models import Student
+from mentor.models import Mentor
+
+
+
+
+
 
 # class CreateStudentView(APIView):
 #     @method_decorator(login_required)
@@ -126,3 +151,78 @@ class DailyReportView(generics.CreateAPIView):
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+
+
+
+
+
+
+#student-exercise
+
+class StudentPanelSendExercise(APIView):
+#   authentication_classes = [JWTAuthentication]
+
+
+    def get_object(self, id):
+        mentor = Student.objects.get(user=self.request.user)
+        return Exercise.objects.filter(id=id, student_name=mentor)
+
+    def get(self, request, id, format=None):
+        exercise = self.get_object(id)
+        serializer = ExerciseSerializer(exercise, many=True)
+        return Response(serializer.data)
+    
+
+    def post(self,request, id):
+        student = Student.objects.get(user=request.user)
+
+        exercise =Exercise.objects.get(id=id, student_name=student)
+
+        # print(student.course)
+        course = student.course
+        mentor = course.mentor
+        exercise = Exercise.objects.get(id=id, student_name=student)
+
+        # Check if the student has already answered the exercise
+        if Answer.objects.filter(student=student, exercise=exercise, is_done_exercise=True).exists():
+            return Response({'detail': 'You have already answered this exercise.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if the course object has the id attribute
+        if not hasattr(course, 'id'):
+            course = Course.objects.get(pk=course.pk)
+
+        serializer = AnswerSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save(student=student, mentor=mentor,course=course, exercise=exercise)   
+        instance.save()
+    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+class GetPostedExerciseOfStudent(APIView):
+   #   authentication_classes = [JWTAuthentication]
+
+    def get(self, request, id):
+  
+        student = Student.objects.get(user=request.user)
+        exercises_done = Answer.objects.filter(student=student)
+        exercise=Exercise.objects.filter(id=id)
+        exercises_done.update(is_done_exercise=False)
+        serializer = AnswerSerializer(instance=exercises_done, many=True)
+    
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+class GetStudentExerciseStatus(APIView):
+#   authentication_classes = [JWTAuthentication]
+ 
+    def get(self, request, *args, **kwargs):
+
+        student = Student.objects.get(user=request.user)
+        exercises_done = Answer.objects.filter(student=student, is_done_exercise=True)
+        exercises_not_done = Answer.objects.filter(student=student, is_done_exercise=False)
+        num_exercises_done = exercises_done.count()
+        num_exercises_not_done = exercises_not_done.count()
+        return Response({'num_exercises_done': num_exercises_done, 'num_exercises_not_done': num_exercises_not_done})
+

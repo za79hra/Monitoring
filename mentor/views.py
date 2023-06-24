@@ -169,3 +169,4 @@ class GetMentorExerciseStatus(APIView):
         num_exercises_not_viewed = exercises_not_viewed.count()
         return Response({'num_exercises_viewed': num_exercises_viewed, 'num_exercises_not_viewed': num_exercises_not_viewed})
     
+
