@@ -109,11 +109,6 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Avatar must be in JPEG/JPG format.')
         return value
 
-    # def update(self, instance, validated_data):
-    #     instance.phone_number = validated_data.get("phone_number", instance.phone_number)
-    #     instance.avatar = validated_data.get("avatar", instance.avatar)
-    #     instance.save()
-    #     return instance
     def update(self, instance, validated_data):
         # Exclude 'identity_code' field from updates
         validated_data.pop('identity_code', None)

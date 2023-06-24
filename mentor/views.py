@@ -228,15 +228,7 @@ class GetAllExam(APIView):
 
 
 class AddGradeView(APIView):
-    # def get_object(self, id):
-    #     mentor = Mentor.objects.get(user=self.request.user)
-    #     return AnswerExam.objects.filter(id=id, mentor=mentor)
 
-    # def get(self, request, id, format=None):
-        
-    #     answer = self.get_object(id)
-    #     serializer = AnswerExamSerializer(answer)
-    #     return Response(serializer.data)
 
     def post(self, request, exam_id, student_id):
         mentor = Mentor.objects.get(user=request.user)

@@ -32,7 +32,7 @@ urlpatterns = [
     # exam
    
     path('create-exam/<int:course_id>/', MentorCreateExam.as_view()),
-    path('get-all-exam/<int:exam_id>/', GetAllExam.as_view()),
+    path('get-exam/<int:exam_id>/', GetAllExam.as_view()),
 
     path('grade-exam/<int:exam_id>/<int:student_id>/', AddGradeView.as_view(), name='add_grade'),
     path('grades/<int:exam_id>/', GradeListView.as_view()),
