@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from .models import Student, Report, Payment
 
 from ceo.models import Course
-from monitoring.utils import *
+from Monitoring.utils import *
 
 
 class StudentSerializer(serializers.ModelSerializer):

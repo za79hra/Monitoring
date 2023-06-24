@@ -10,7 +10,7 @@ from rest_framework import status, generics, pagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.reverse import reverse
 
-import mentor.models
+# import mentor.models
 from mentor.serializers import MentorSerializer
 from mentor.models import Mentor
 from student.models import Student, AdminPayment

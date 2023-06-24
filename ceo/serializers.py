@@ -8,7 +8,7 @@ from .models import Course, DailyNote
 from mentor.models import Mentor
 from student.serializers import StudentSerializer
 from student.models import AdminPayment
-from monitoring.utils import *
+from Monitoring.utils import *
 
 
 class LoginViewAsAdminSerializer(serializers.ModelSerializer):
